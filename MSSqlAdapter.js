@@ -12,6 +12,46 @@ const { TraceUtils } = require('@themost/common');
 const { SqlUtils } = require('@themost/query');
 const { MSSqlFormatter } = require('./MSSqlFormatter');
 const { TransactionIsolationLevelFormatter } = require('./TransactionIsolationLevel')
+const { AsyncSeriesEventEmitter, before, after } = require('@themost/events');
+
+/**
+ *
+ * @param {{target: MSSqlAdapter, query: string|QueryExpression, results: Array<*>}} event
+ */
+function onReceivingJsonObject(event) {
+    if (typeof event.query === 'object' && event.query.$select) {
+        // try to identify the usage of a $jsonObject dialect and format result as JSON
+        const { $select: select } = event.query;
+        if (select) {
+            const attrs = Object.keys(select).reduce((previous, current) => {
+                const fields = select[current];
+                previous.push(...fields);
+                return previous;
+            }, []).filter((x) => {
+                const [key] = Object.keys(x);
+                if (typeof key !== 'string') {
+                    return false;
+                }
+                return x[key].$jsonObject != null || x[key].$json != null;
+            }).map((x) => {
+                return Object.keys(x)[0];
+            });
+            if (attrs.length > 0) {
+                if (Array.isArray(event.results)) {
+                    for(const result of event.results) {
+                        attrs.forEach((attr) => {
+                            if (Object.prototype.hasOwnProperty.call(result, attr) && typeof result[attr] === 'string') {
+                                    result[attr] = JSON.parse(result[attr]);
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 /**
  * @class
  */
@@ -23,7 +63,7 @@ class MSSqlAdapter {
     constructor(options) {
         /**
          * @private
-         * @type {Connection}
+         * @type {import('mssql').Connection}
          */
         this.rawConnection = null;
         /**
@@ -49,6 +89,38 @@ class MSSqlAdapter {
                 }).join(';');
             }, configurable: false, enumerable: false
         });
+        this.executing = new AsyncSeriesEventEmitter();
+        this.executed = new AsyncSeriesEventEmitter();
+        this.executed.subscribe(onReceivingJsonObject);
+
+        // important note: use javascript decorators as functions because 
+        // @themost/mssql@lts does not support decorators
+        const executePropertyDescriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), 'execute');
+        before(({target, args}, callback) => {
+            const [query, params] = args;
+            void target.executing.emit({
+                target,
+                query,
+                params
+            }).then(() => {
+                return callback();
+            }).catch((err) => {
+                return callback(err);
+            });
+        })(this, 'execute', executePropertyDescriptor);
+        after(({target, args}, callback) => {
+            const [query, params] = args;
+            void target.executed.emit({
+                target,
+                query,
+                params
+            }).then(() => {
+                return callback();
+            }).catch((err) => {
+                return callback(err);
+            });
+        })(this, 'execute', executePropertyDescriptor);
+
     }
     prepare(query, values) {
         return SqlUtils.format(query, values);
@@ -119,12 +191,21 @@ class MSSqlAdapter {
     close(callback) {
         const self = this;
         if (self.rawConnection == null) {
-            if (typeof callback == 'function') {
-                return callback();
-            }
-            return;
+            return callback();
         }
-        self.rawConnection.close(function (err) {
+        if (typeof callback !== 'function') {
+            throw new Error('Invalid argument. Callback function is required.');
+        }
+        // important note: if Connection.connected is false and Connection.connecting is false
+        // Connection.close() function returns connection itself. Otherwise callback will be called
+        // This behaviour should be handled here and avoid keeping open handles
+        if (self.rawConnection.connecting === false &&
+            self.rawConnection.connected === false) {
+            // handle close event manualll
+            this.rawConnection = null;
+            return callback();
+        }
+        void self.rawConnection.close(function (err) {
             if (err) {
                 TraceUtils.error('An error occurred while closing database connection');
                 TraceUtils.error(err);
@@ -132,9 +213,7 @@ class MSSqlAdapter {
             //do nothing
             self.rawConnection = null;
             // invoke callback
-            if (typeof callback == 'function') {
-                return callback();
-            }
+            return callback();
         });
     }
     /**
@@ -1290,6 +1369,8 @@ class MSSqlAdapter {
     }
 
 }
+
+
 
 module.exports = {
     MSSqlAdapter

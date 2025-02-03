@@ -61,9 +61,9 @@ describe('MSSqlFormatter', () => {
     it('should use database(string).exists()', async () => {
         const adapter = new MSSqlAdapter(testConnectionOptions);
         let exists = await adapter.database(testConnectionOptions.database).existsAsync();
-        expect(exists).toBeTrue();
+        expect(exists).toBeTruthy();
         exists = await adapter.database('other_database').existsAsync();
-        expect(exists).toBeFalse();
+        expect(exists).toBeFalsy();
         await adapter.closeAsync();
     });
 
@@ -71,10 +71,10 @@ describe('MSSqlFormatter', () => {
         const adapter = new MSSqlAdapter(testConnectionOptions);
         await adapter.database('test_create_a_database').createAsync();
         let exists = await adapter.database('test_create_a_database').existsAsync();
-        expect(exists).toBeTrue();
+        expect(exists).toBeTruthy();
         await adapter.executeAsync('DROP DATABASE test_create_a_database;');
         exists = await adapter.database('test_create_a_database').existsAsync();
-        expect(exists).toBeFalse();
+        expect(exists).toBeFalsy();
         await adapter.closeAsync();
     });
 
@@ -85,11 +85,11 @@ describe('MSSqlFormatter', () => {
             await adapter.table(ProductModel.source).create(ProductModel.fields);
         }
         exists = await adapter.table(ProductModel.source).existsAsync();
-        expect(exists).toBeTrue();
+        expect(exists).toBeTruthy();
         // drop table by executing SQL
         await adapter.executeAsync(`DROP TABLE [${ProductModel.source}];`);
         exists = await adapter.table(ProductModel.source).existsAsync();
-        expect(exists).toBeFalse();
+        expect(exists).toBeFalsy();
         await adapter.closeAsync();
     });
 
@@ -102,7 +102,7 @@ describe('MSSqlFormatter', () => {
         }
         await adapter.table(ProductModel.source).create(ProductModel.fields);
         exists = await adapter.table(ProductModel.source).existsAsync();
-        expect(exists).toBeTrue();
+        expect(exists).toBeTruthy();
         // drop table
         await adapter.executeAsync(`DROP TABLE [${ProductModel.source}];`);
         await adapter.closeAsync();
@@ -166,14 +166,14 @@ describe('MSSqlFormatter', () => {
     it('should use view(string).exists()', async () => {
         const adapter = new MSSqlAdapter(testConnectionOptions);
         let exists = await adapter.view('EmployeesView').existsAsync();
-        expect(exists).toBeFalse();
+        expect(exists).toBeFalsy();
 
         await adapter.table(EmployeeModel.source).create(EmployeeModel.fields);
 
         await adapter.view('EmployeesView').createAsync(new QueryExpression().from('Employees').select('*'));
 
         exists = await adapter.view('EmployeesView').existsAsync();
-        expect(exists).toBeTrue();
+        expect(exists).toBeTruthy();
         // drop view
         await adapter.view('EmployeesView').dropAsync();
         // drop table
@@ -190,7 +190,7 @@ describe('MSSqlFormatter', () => {
         }
         await adapter.table(ProductModel.source).create(ProductModel.fields);
         exists = await adapter.table(ProductModel.source).existsAsync();
-        expect(exists).toBeTrue();
+        expect(exists).toBeTruthy();
         // list indexes
         const indexes = await adapter.indexes(ProductModel.source).listAsync();
         expect(indexes).toBeTruthy();
@@ -213,7 +213,7 @@ describe('MSSqlFormatter', () => {
         }
         await adapter.table(ProductModel.source).create(ProductModel.fields);
         exists = await adapter.table(ProductModel.source).existsAsync();
-        expect(exists).toBeTrue();
+        expect(exists).toBeTruthy();
         await adapter.indexes(ProductModel.source).createAsync('INDEX_Product_Name', [
             'ProductName'
         ]);
@@ -234,7 +234,7 @@ describe('MSSqlFormatter', () => {
         }
         await adapter.table(ProductModel.source).create(ProductModel.fields);
         exists = await adapter.table(ProductModel.source).existsAsync();
-        expect(exists).toBeTrue();
+        expect(exists).toBeTruthy();
         await adapter.indexes(ProductModel.source).createAsync('INDEX_Product_Name', [
             'ProductName'
         ]);

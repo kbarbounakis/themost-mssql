@@ -1,7 +1,7 @@
 const { QueryEntity, QueryExpression, QueryField } = require('@themost/query');
 const { MSSqlAdapter } = require('../index');
 const moment = require('moment/moment');
-const { tryCreateTestDatabase, tryDropTestDatabase, testConnectionOptions } = require('./utils');
+const { tryCreateTestDatabase, testConnectionOptions } = require('./utils');
 
 describe('Type Casting', () => {
 
@@ -17,7 +17,6 @@ describe('Type Casting', () => {
         await tryCreateTestDatabase();
     });
     afterAll(async () => {
-        await tryDropTestDatabase();
         await db.closeAsync();
     });
 

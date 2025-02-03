@@ -1,25 +1,24 @@
-const { MSSqlAdapter, createInstance } = require('../index');
+const { MSSqlAdapter } = require('../index');
 const { QueryExpression } = require('@themost/query')
-const util = require('util');
 // get options from environmet for testing
 const testConnectionOptions = {
-    "server": process.env.DB_HOST,
-    "port": process.env.DB_PORT,
-    "user": process.env.DB_USER,
-    "password": process.env.DB_PASSWORD,
-    "database": "test_themost_dev",
-    "options": {
-        "transactionIsolationLevel": "readCommitted"
+    'server': process.env.DB_HOST,
+    'port': process.env.DB_PORT,
+    'user': process.env.DB_USER,
+    'password': process.env.DB_PASSWORD,
+    'database': 'test_themost_dev',
+    'options': {
+        'transactionIsolationLevel': 'readCommitted'
     }
 };
 
 // get options from environmet for testing
 const masterConnectionOptions = {
-    "server": process.env.DB_HOST,
-    "port": process.env.DB_PORT,
-    "user": process.env.DB_USER,
-    "password": process.env.DB_PASSWORD,
-    "database": "master"
+    'server': process.env.DB_HOST,
+    'port': process.env.DB_PORT,
+    'user': process.env.DB_USER,
+    'password': process.env.DB_PASSWORD,
+    'database': 'master'
 };
 
 const BIN_TO_UUID = `

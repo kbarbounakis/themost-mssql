@@ -1,11 +1,13 @@
 {
     "$schema": "https://themost-framework.github.io/themost/models/2018/2/schema.json",
-    "name": "Order",
-    "title": "Orders",
+    "name": "SimpleOrder",
+    "title": "SimpleOrders",
+    "source": "SimpleOrders",
+    "view": "SimpleOrders",
     "hidden": false,
     "sealed": false,
     "abstract": false,
-    "version": "2.0",
+    "version": "1.0.0",
     "fields": [
         {
             "@id": "https://themost.io/schemas/id",
@@ -19,19 +21,22 @@
             "name": "acceptedOffer",
             "title": "Accepted Offer",
             "description": "The offer e.g. product included in the order.",
-            "type": "Offer"
+            "type": "Json",
+            "additionalType": "Offer"
         },
         {
             "name": "billingAddress",
             "title": "Billing Address",
             "description": "The billing address for the order.",
-            "type": "PostalAddress"
+            "type": "Json",
+            "additionalType": "PostalAddress"
         },
         {
             "name": "customer",
             "title": "Customer",
             "description": "Party placing the order.",
-            "type": "Person",
+            "type": "Json",
+            "additionalType": "Person",
             "editable": false,
             "nullable": false
         },
@@ -63,7 +68,8 @@
             "name": "merchant",
             "title": "Merchant",
             "description": "The party taking the order (e.g. Amazon.com is a merchant for many sellers).",
-            "type": "Party"
+            "type": "Json",
+            "additionalType": "Party"
         },
         {
             "name": "orderDate",
@@ -76,7 +82,8 @@
             "name": "orderedItem",
             "title": "Ordered Item",
             "description": "The item ordered.",
-            "type": "Product",
+            "type": "Json",
+            "additionalType": "Product",
             "expandable": true,
             "editable": true,
             "nullable": false
@@ -93,7 +100,8 @@
             "name": "orderStatus",
             "title": "Order Status",
             "description": "The current status of the order.",
-            "type": "OrderStatusType",
+            "type": "Json",
+            "additionalType": "OrderStatusType",
             "expandable": true,
             "nullable": false,
             "value": "javascript:return { alternateName: 'OrderProcessing' };"
@@ -108,7 +116,8 @@
             "name": "paymentMethod",
             "title": "Payment Method",
             "description": "The name of the credit card or other method of payment for the order.",
-            "type": "PaymentMethod",
+            "type": "Json",
+            "additionalType": "PaymentMethod",
             "expandable": true
         },
         {

@@ -93,34 +93,6 @@ class MSSqlAdapter {
         this.executed = new AsyncSeriesEventEmitter();
         this.executed.subscribe(onReceivingJsonObject);
 
-        // important note: use javascript decorators as functions because 
-        // @themost/mssql@lts does not support decorators
-        const executePropertyDescriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), 'execute');
-        before(({target, args}, callback) => {
-            const [query, params] = args;
-            void target.executing.emit({
-                target,
-                query,
-                params
-            }).then(() => {
-                return callback();
-            }).catch((err) => {
-                return callback(err);
-            });
-        })(this, 'execute', executePropertyDescriptor);
-        after(({target, args}, callback) => {
-            const [query, params] = args;
-            void target.executed.emit({
-                target,
-                query,
-                params
-            }).then(() => {
-                return callback();
-            }).catch((err) => {
-                return callback(err);
-            });
-        })(this, 'execute', executePropertyDescriptor);
-
     }
     prepare(query, values) {
         return SqlUtils.format(query, values);
@@ -1370,7 +1342,37 @@ class MSSqlAdapter {
 
 }
 
+// important note: use javascript decorators as functions because 
+// @themost/mssql@lts does not support decorators
+const executeDescriptor = Object.getOwnPropertyDescriptor(MSSqlAdapter.prototype, 'execute')
+const beforeDescriptor = before(({target, args}, callback) => {
+    const [query, params] = args;
+    void target.executing.emit({
+        target,
+        query,
+        params
+    }).then(() => {
+        return callback();
+    }).catch((err) => {
+        return callback(err);
+    });
+})(MSSqlAdapter.prototype, 'execute', Object.getOwnPropertyDescriptor(MSSqlAdapter.prototype, 'execute'));
+Object.assign(MSSqlAdapter.prototype, { execute: beforeDescriptor.value });
 
+const afterDescriptor = after(({target, args, result: results}, callback) => {
+    const [query, params] = args;
+    void target.executed.emit({
+        target,
+        query,
+        params,
+        results
+    }).then(() => {
+        return callback();
+    }).catch((err) => {
+        return callback(err);
+    });
+})(MSSqlAdapter.prototype, 'execute', executeDescriptor);
+Object.assign(MSSqlAdapter.prototype, { execute: afterDescriptor.value });
 
 module.exports = {
     MSSqlAdapter

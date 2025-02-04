@@ -325,7 +325,7 @@ describe('SqlFormatter', () => {
         await app.executeInTestTranscaction(async (context) => {
             const Orders = context.model('Order').silent();
             const q = Orders.select(
-                'id', 'orderedItem', 'orderDate'
+                'id', 'orderDate'
             ).where('customer/description').equal('Eric Thomas');
             const select = q.query.$select[Orders.viewAdapter];
             select.push({

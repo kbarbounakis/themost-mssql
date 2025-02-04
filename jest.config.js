@@ -90,6 +90,7 @@ const config = {
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   moduleNameMapper: {
+    '^@themost/data$': '<rootDir>/modules/data/index',
     '^@themost/mssql/n$': '<rootDir>/n/index',
     '^@themost/mssql$': '<rootDir>/index',
   },

@@ -1,10 +1,10 @@
 // eslint-disable-next-line no-unused-vars
-import {DataApplication, DataConfigurationStrategy, NamedDataContext, DataCacheStrategy, DataContext, ODataModelBuilder, ODataConventionModelBuilder} from '@themost/data';
-import { createInstance, MSSqlFormatter } from '../src';
-import { TraceUtils, LangUtils } from '@themost/common';
-import { QueryExpression } from '@themost/query';
-import { SqliteAdapter } from '@themost/sqlite';
-import path from 'path';
+const { DataApplication, DataConfigurationStrategy, NamedDataContext, DataCacheStrategy, DataContext, ODataModelBuilder, ODataConventionModelBuilder } = require('@themost/data');
+const { createInstance, MSSqlFormatter } = require('../index');
+const { TraceUtils, LangUtils } = require('@themost/common');
+const { QueryExpression } = require('@themost/query');
+const { SqliteAdapter } = require('@themost/sqlite');
+const path = require('path');
 
 const testConnectionOptions = {
     'server': process.env.DB_HOST,
@@ -62,11 +62,13 @@ class TestApplication extends DataApplication {
         // add adapter type
         const name = 'MSSQL Data Adapter';
         const invariantName = 'mssql';
-        dataConfiguration.adapterTypes.set(invariantName, {
-            name,
-            invariantName,
-            createInstance
-        });
+        Object.assign(dataConfiguration.adapterTypes, {
+            mssql: {
+                name,
+                invariantName,
+                createInstance
+            }
+        })
         dataConfiguration.adapters.push({
             name: 'master',
             invariantName: 'mssql',
@@ -282,6 +284,6 @@ class TestApplication extends DataApplication {
 
 }
 
-export {
+module.exports = {
     TestApplication
 }

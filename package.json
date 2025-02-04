@@ -36,15 +36,16 @@
   },
   "peerDependencies": {
     "@themost/common": ">= 2.5.0 < 3",
-    "@themost/query": "~2.5.23"
+    "@themost/query": "lts"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.1.0",
     "@eslint/js": "^9.11.0",
     "@themost/common": "^2.11.0",
+    "@themost/data": "^2.6.78",
     "@themost/json-logger": "^1.1.0",
-    "@themost/query": "^2.5.23",
-    "@themost/sqlite": "^2.7.3",
+    "@themost/query": "^2.6.73",
+    "@themost/sqlite": "^2.9.1",
     "@types/async": "^3.2.24",
     "@types/mssql": "^9.1.6",
     "@types/tedious": "^4.0.14",

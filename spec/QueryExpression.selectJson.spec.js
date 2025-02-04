@@ -1,12 +1,12 @@
 // noinspection SpellCheckingInspection
 
-import {MemberExpression, MethodCallExpression, QueryEntity, QueryExpression, QueryField} from '@themost/query';
-import { MSSqlFormatter } from '../src';
-import SimpleOrderSchema from './config/models/SimpleOrder.json';
-import {TestApplication} from './TestApplication';
-import { TraceUtils } from '@themost/common';
-import { DataPermissionEventListener } from '@themost/data';
-import { promisify } from 'util';
+const { MemberExpression, MethodCallExpression, QueryEntity, QueryExpression, QueryField } = require('@themost/query');
+const { MSSqlFormatter } = require('../index');
+const SimpleOrderSchema = require('./config/models/SimpleOrder.json');
+const { TestApplication } = require('./TestApplication');
+const { TraceUtils } = require('@themost/common');
+const { DataPermissionEventListener } = require('@themost/data');
+const { promisify } = require('util');
 const beforeExecuteAsync = promisify(DataPermissionEventListener.prototype.beforeExecute);
 
 /**
@@ -71,7 +71,9 @@ async function createSimpleOrders(db) {
         const customer = customers.find((x) => x.id === order.customer);
         if (customer) {
             customer.address = postalAddresses.find((x) => x.id === customer.address);
-            delete customer.address?.id;
+            if (customer.address) {
+                delete customer.address.id;
+            }
         }
         return {
             orderDate,
@@ -123,6 +125,8 @@ describe('SqlFormatter', () => {
     let context;
     beforeAll(async () => {
         app = new TestApplication(__dirname);
+        await app.tryCreateDatabase();
+        await app.trySetData();
         context = app.createContext();
         const {db} = context;
         await createSimpleOrders(db);
